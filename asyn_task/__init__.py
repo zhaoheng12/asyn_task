@@ -13,6 +13,17 @@ import sys
 import base64
 import datetime
 import psutil
+from .log import get_logger
+
+try:
+    logger = get_logger('/tmp/asyn_task.log',3)
+except:
+    logger = None
+
+
+def log(message):
+    if logger:
+        logger.info(message)
 
 
 
@@ -42,6 +53,7 @@ def run_task(fun, args=(), kwargs={}):
     fun = cloudpickle.dumps(fun)
     fun_b64 = base64.b64encode(fun).decode()
     data = {"fun_b64":fun_b64, 'args': args, 'kwargs': kwargs}
+    log(data)
     # print(data)
     data_json = json.dumps(data)
     os.system("mkdir -p /tmp/process_task")
@@ -76,6 +88,7 @@ def run_task(fun, args=(), kwargs={}):
 
     os.system("%s %s/process_task.py %s >> /tmp/process_task_log/%s.log 2>&1" %
               (_py_path, _current_dir, task_id, task_id))
+    log('任务id%s'%task_id)
     return task_id
 
 
